@@ -12,7 +12,7 @@ type ButtonProps = {
 };
 
 export default function Button({
-  title = "3123",
+  title = "",
   onPress = () => {},
   style,
   textStyle,

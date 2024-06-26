@@ -1,5 +1,5 @@
 import Button from "@/components/UI/Button";
-import { Colors } from "@/constants/Colors";
+import { router } from "expo-router";
 import {
   Text,
   View,
@@ -14,34 +14,41 @@ export default function Landing() {
     <View style={styles.baseContainer}>
       <ImageBackground
         style={styles.imageBackground}
-        source={require("../assets/images/mic-bg.png")}
+        source={require("../../assets/images/mic-bg.png")}
       >
         <View style={styles.container}>
-          <Image source={require("../assets/images/logo.png")} />
+          <Image source={require("../../assets/images/logo.png")} />
           <Text style={styles.headline}>
             build a new audio live room app similar to Pod Bean
           </Text>
 
           <View style={styles.btnContainer}>
-            <Button title="Sign Up Free" />
+            <Button
+              title="Sign Up Free"
+              onPress={() => router.push("/auth/signupEmail")}
+            />
             <Button
               title="Continue with Google"
               mode="outlined"
               imageComp={
-                <Image source={require("../assets/images/icon_google.png")} />
+                <Image
+                  source={require("../../assets/images/icon_google.png")}
+                />
               }
             />
             <Button
               title="Continue with Facebook"
               mode="outlined"
               imageComp={
-                <Image source={require("../assets/images/icon_facebook.png")} />
+                <Image
+                  source={require("../../assets/images/icon_facebook.png")}
+                />
               }
             />
           </View>
 
           <View style={styles.bottomLogin}>
-            <Pressable>
+            <Pressable onPress={() => router.push("/auth/loginEmail")}>
               <Text>Log In</Text>
             </Pressable>
             <Text>|</Text>
