@@ -1,53 +1,66 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Formik } from "formik";
 import Button from "./UI/Button";
 import TextInput from "./UI/TextInput";
+import { getInitialFormFields } from "@/utils";
 
-type FieldProps = {
+export type FieldProps = {
   name: string;
   label?: string;
   placeholder?: string;
   secureTextEntry?: boolean;
 };
 
-type FormProps = {
-  fields?: Array<FieldProps>;
+export type FormProps = {
+  fields: Array<FieldProps>;
   initialValues?: any;
   buttonText?: string;
+  onSubmit?: Function;
 };
 
 export const Form = ({
   fields,
   initialValues,
   buttonText = "Submit",
-}: FormProps) => (
-  <Formik
-    initialValues={initialValues}
-    onSubmit={(values) => console.log(values)}
-  >
-    {({ handleChange, handleBlur, handleSubmit, values }) => (
-      <View style={styles.inputsContainer}>
-        {fields?.map((item, idx) => (
-          <TextInput
-            key={idx}
-            onChangeText={handleChange(item?.name)}
-            onBlur={handleBlur(item?.name)}
-            value={values?.[item?.name]}
-            placeholder={item?.placeholder}
-            secureTextEntry={item?.secureTextEntry}
-            label={item?.label}
-          />
-        ))}
-        <Button
-          onPress={handleSubmit}
-          title={buttonText}
-          style={{ marginTop: 15 }}
-        />
-      </View>
-    )}
-  </Formik>
-);
+  onSubmit = () => {},
+}: FormProps) => {
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  return (
+    <Formik
+      initialValues={initialValues || getInitialFormFields(fields)}
+      onSubmit={(values) => {
+        setSubmitLoading(true);
+        onSubmit(values);
+        setSubmitLoading(false);
+      }}
+    >
+      {({ handleChange, handleBlur, handleSubmit, values }) => (
+        <View style={styles.inputsContainer}>
+          {fields?.map((item, idx) => (
+            <TextInput
+              key={idx}
+              onChangeText={handleChange(item?.name)}
+              onBlur={handleBlur(item?.name)}
+              value={values?.[item?.name]}
+              placeholder={item?.placeholder}
+              secureTextEntry={item?.secureTextEntry}
+              label={item?.label}
+            />
+          ))}
+          <View style={{ marginTop: 15 }}>
+            <Button
+              onPress={handleSubmit}
+              title={buttonText}
+              loading={submitLoading}
+            />
+          </View>
+        </View>
+      )}
+    </Formik>
+  );
+};
 
 const styles = StyleSheet.create({
   inputsContainer: {

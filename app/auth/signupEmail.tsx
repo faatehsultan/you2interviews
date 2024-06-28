@@ -1,11 +1,14 @@
 import AuthHeader from "@/components/AuthHeader";
 import { Form } from "@/components/Form";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Pressable, Text } from "react-native";
+import { apiSignupWithEmail } from "@/firebase/api";
+import { router } from "expo-router";
+import Toast from "react-native-root-toast";
 
 const formFields = [
   {
     label: "Nickname*",
-    name: "nickname",
+    name: "name",
     placeholder: "Davide Oretti",
   },
   {
@@ -22,6 +25,20 @@ const formFields = [
 ];
 
 export default function SignupEmail() {
+  const handleSignup = async (data: any) => {
+    const response = await apiSignupWithEmail(
+      data?.email,
+      data?.password,
+      data?.name
+    );
+
+    if (response.success && response.data?.user) {
+      Toast.show("User registered! please login");
+
+      router.replace("/auth/loginEmail");
+    }
+  };
+
   return (
     <View style={styles.baseContainer}>
       <AuthHeader />
@@ -29,7 +46,15 @@ export default function SignupEmail() {
       <View style={styles.container}>
         <Image source={require("../../assets/images/logo.png")} />
 
-        <Form fields={formFields} buttonText="Sign Up" />
+        <Form
+          fields={formFields}
+          buttonText="Sign Up"
+          onSubmit={handleSignup}
+        />
+
+        <Pressable style={{ marginTop: 15 }}>
+          <Text style={{ fontSize: 12 }}>Already have account? login now</Text>
+        </Pressable>
       </View>
     </View>
   );

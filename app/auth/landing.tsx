@@ -10,6 +10,10 @@ import {
 } from "react-native";
 
 export default function Landing() {
+  const handleGoogleSignin = () => {
+    console.log("login with google triggered");
+  };
+
   return (
     <View style={styles.baseContainer}>
       <ImageBackground
@@ -35,6 +39,7 @@ export default function Landing() {
                   source={require("../../assets/images/icon_google.png")}
                 />
               }
+              onPress={handleGoogleSignin}
             />
             <Button
               title="Continue with Facebook"

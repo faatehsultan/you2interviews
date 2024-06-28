@@ -16,10 +16,12 @@
       "supportsTablet": true
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.faatehsultan.you2interviews"
     },
     "web": {
       "bundler": "metro",
@@ -28,10 +30,19 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "@react-native-firebase/app"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "052ffbf1-9f59-4e70-9769-797cd2641a69"
+      }
     }
   }
 }
