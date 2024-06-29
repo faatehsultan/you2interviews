@@ -1,4 +1,4 @@
-import AuthHeader from "@/components/AuthHeader";
+import HeaderPrimary from "@/components/HeaderPrimary";
 import { Form } from "@/components/Form";
 import { View, StyleSheet, Image, Pressable, Text } from "react-native";
 import { apiSignupWithEmail } from "@/firebase/api";
@@ -41,7 +41,7 @@ export default function SignupEmail() {
 
   return (
     <View style={styles.baseContainer}>
-      <AuthHeader />
+      <HeaderPrimary />
 
       <View style={styles.container}>
         <Image source={require("../../assets/images/logo.png")} />
@@ -52,7 +52,10 @@ export default function SignupEmail() {
           onSubmit={handleSignup}
         />
 
-        <Pressable style={{ marginTop: 15 }}>
+        <Pressable
+          style={{ marginTop: 15 }}
+          onPress={() => router.push("/auth/loginEmail")}
+        >
           <Text style={{ fontSize: 12 }}>Already have account? login now</Text>
         </Pressable>
       </View>

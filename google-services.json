@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "729938612229",
+    "project_id": "temp-9cce8",
+    "storage_bucket": "temp-9cce8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:729938612229:android:9fc780ffa498bc31e40c6c",
+        "android_client_info": {
+          "package_name": "com.faatehsultan.you2interviews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "729938612229-s531a690d74gjh3eh85ckthpdqd3stih.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.faatehsultan.you2interviews",
+            "certificate_hash": "11d9e2b95ab08c04dc014601197bc6396f8f9af9"
+          }
+        },
+        {
+          "client_id": "729938612229-8jhhfqgen05ovbv4sod7r4ghg4lnqmi5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSvNfqZ9nGtGdmaZJwCZ8FCy1q0nOTJzc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "729938612229-8jhhfqgen05ovbv4sod7r4ghg4lnqmi5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

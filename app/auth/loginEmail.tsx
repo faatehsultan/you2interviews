@@ -1,4 +1,4 @@
-import AuthHeader from "@/components/AuthHeader";
+import HeaderPrimary from "@/components/HeaderPrimary";
 import { Form } from "@/components/Form";
 import { useSession } from "@/context/session";
 import { apiLoginWithEmail } from "@/firebase/api";
@@ -38,7 +38,7 @@ export default function LoginEmail() {
 
   return (
     <View style={styles.baseContainer}>
-      <AuthHeader />
+      <HeaderPrimary />
 
       <View style={styles.container}>
         <Image source={require("../../assets/images/logo.png")} />

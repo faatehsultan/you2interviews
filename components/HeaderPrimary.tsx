@@ -2,7 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { router } from "expo-router";
 
-export default function AuthHeader() {
+export default function HeaderPrimary() {
   return (
     <Pressable
       style={styles.container}
@@ -17,6 +17,6 @@ export default function AuthHeader() {
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 20,
+    paddingLeft: 15,
   },
 });
