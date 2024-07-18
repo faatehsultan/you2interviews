@@ -31,11 +31,12 @@ export default function SignupEmail() {
       data?.password,
       data?.name
     );
-
     if (response.success && response.data?.user) {
-      Toast.show("User registered! please login");
+      Toast.show("User registered! Please verify your email via link the sent");
 
       router.replace("/auth/loginEmail");
+    } else {
+      Toast.show(response?.data?.message || "Signup error");
     }
   };
 

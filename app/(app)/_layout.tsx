@@ -1,9 +1,10 @@
 import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 import { useSession } from "../../context/session";
+import NonVerfiedEmailOverlay from "@/components/NonVerfiedEmailOverlay";
 
 export default function AppLayout() {
-  const { signIn, signOut, session, isLoading } = useSession();
+  const { session, isLoading } = useSession();
 
   if (isLoading) {
     return <Text>Loading...</Text>;
@@ -11,6 +12,10 @@ export default function AppLayout() {
 
   if (!session) {
     return <Redirect href="/auth/landing" />;
+  }
+
+  if (!session?.emailVerified) {
+    return <NonVerfiedEmailOverlay />;
   }
 
   return (

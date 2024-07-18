@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.faatehsultan.you2interviews"
     },
     "android": {
       "googleServicesFile": "./google-services.json",

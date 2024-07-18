@@ -1,10 +1,13 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile,
+  getAuth,
 } from "firebase/auth";
 import { auth as base_auth } from ".";
 import { Response } from "@/types/response";
-import firestore from "@react-native-firebase/firestore";
 // import auth from "@react-native-firebase/auth";
 // import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
@@ -20,9 +23,8 @@ export const apiSignupWithEmail = async (
       password
     );
 
-    firestore().collection("users").doc(res?.user?.uid).set({
-      name: name,
-    });
+    await updateProfile(res?.user, { displayName: name });
+    await sendEmailVerification(res?.user);
 
     return new Response(res);
   } catch (e) {
@@ -36,6 +38,26 @@ export const apiLoginWithEmail = async (email: string, password: string) => {
     const res = await signInWithEmailAndPassword(base_auth, email, password);
 
     return new Response(res);
+  } catch (e) {
+    console.log(e);
+    return new Response(e, false);
+  }
+};
+
+export const apiResetPassword = async (email: string) => {
+  try {
+    const res = await sendPasswordResetEmail(base_auth, email);
+
+    return new Response(res);
+  } catch (e) {
+    console.log(e);
+    return new Response(e, false);
+  }
+};
+
+export const apiGetCurrentUser = () => {
+  try {
+    return new Response(base_auth.currentUser);
   } catch (e) {
     console.log(e);
     return new Response(e, false);

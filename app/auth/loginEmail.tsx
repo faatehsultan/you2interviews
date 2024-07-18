@@ -3,7 +3,7 @@ import { Form } from "@/components/Form";
 import { useSession } from "@/context/session";
 import { apiLoginWithEmail } from "@/firebase/api";
 import { router } from "expo-router";
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, Pressable, Text } from "react-native";
 import Toast from "react-native-root-toast";
 
 const formFields = [
@@ -27,12 +27,11 @@ export default function LoginEmail() {
     const response = await apiLoginWithEmail(data?.email, data?.password);
 
     if (response.success && response.data?.user) {
-      console.log("ress:", response);
-      signIn(response);
+      signIn(response.data?.user);
 
       router.replace("/");
     } else {
-      Toast.show("User not found");
+      Toast.show(response?.data?.message || "User not found");
     }
   };
 
@@ -44,6 +43,17 @@ export default function LoginEmail() {
         <Image source={require("../../assets/images/logo.png")} />
 
         <Form fields={formFields} buttonText="Log In" onSubmit={handleLogin} />
+
+        <Pressable
+          onPress={() => router.push("/auth/resetPassword")}
+          style={{ marginTop: 30 }}
+        >
+          <Text
+            style={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+          >
+            Forgot Password? Click Here
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

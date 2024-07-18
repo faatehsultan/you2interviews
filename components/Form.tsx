@@ -30,9 +30,9 @@ export const Form = ({
   return (
     <Formik
       initialValues={initialValues || getInitialFormFields(fields)}
-      onSubmit={(values) => {
+      onSubmit={async (values) => {
         setSubmitLoading(true);
-        onSubmit(values);
+        onSubmit && (await onSubmit(values));
         setSubmitLoading(false);
       }}
     >

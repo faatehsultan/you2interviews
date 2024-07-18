@@ -13,11 +13,10 @@ import { useCallback, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
 import Button from "@/components/UI/Button";
-import firestore from "@react-native-firebase/firestore";
-import { useSession } from "@/context/session";
 import { formatTimer, parseSessionTitleToChannel } from "@/utils";
-import Broadcaster from "@/components/Broadcaster";
 import useBroadcaster from "@/hooks/useBroadcaster";
+import useCache, { CACHE_KEYS } from "@/redux/useCache";
+import moment from "moment";
 
 const getPermission = async () => {
   if (Platform.OS === "android") {
@@ -34,33 +33,15 @@ export default function NewRecording() {
   const [showRecordingForm, setShowRecordingForm] = useState(false);
   const [sessionTitle, setSessionTitle] = useState("");
   const [isOpen, setIsOpen] = useState(true);
-  const [streamingStartTime, setStreamingStartTime] = useState(null);
-  const [isAudience, setIsAudience] = useState(false);
   const [timerVal, setTimeVal] = useState("00:00");
 
-  const { joinChannel, leaveChannel } = useBroadcaster();
+  const { joinChannelAsHost, leaveChannel } = useBroadcaster();
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const target = (
-  //       await firestore().collection("streamings").doc(channelName).get()
-  //     ).data();
-  //     if (target?.["broadcaster_uid"]) {
-  //       setIsAudience(false);
-  //       const startTime = (
-  //         await firestore().collection("timelines").doc(channelName).get()
-  //       ).data()?.["start_time"];
-  //       if (startTime) {
-  //         setStreamingStartTime(startTime);
-  //       }
-  //     } else {
-  //       setIsAudience(true);
-  //     }
-  //   })();
-  // }, []);
+  const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+  const streamingStartTimeCache = useCache(CACHE_KEYS.STREAMING_START_TIME);
 
   const handleSheetChanges = useCallback((index: number) => {
-    console.log("handleSheetChanges", index);
+    // console.log("handleSheetChanges", index);
   }, []);
 
   const handleInitiateRecording = () => {
@@ -70,28 +51,27 @@ export default function NewRecording() {
   const [isJoined, setIsJoined] = useState(false); // Whether the local user has joined the channel
 
   useEffect(() => {
-    if (isJoined && streamingStartTime) {
-      const intervalId = setInterval(() => {
-        console.log("setting timer again");
-        setTimeVal(formatTimer(streamingStartTime));
+    if (isJoined && streamingStartTimeCache.get()) {
+      const interval = setInterval(() => {
+        setTimeVal(formatTimer(Date.now() - streamingStartTimeCache.get()));
       }, 1000);
 
-      // Clean up the interval on component unmount
-      return () => clearInterval(intervalId);
+      return () => clearInterval(interval);
     }
-  }, [isJoined, streamingStartTime]);
+  }, [isJoined, streamingStartTimeCache]);
 
   const join = async () => {
-    console.log("is joined>>>>", isJoined);
     if (isJoined) {
       return;
     }
 
-    await joinChannel(parseSessionTitleToChannel(sessionTitle));
-    setIsJoined(true);
-    try {
-    } catch (e) {
-      console.log(e);
+    const success = await joinChannelAsHost(
+      parseSessionTitleToChannel(sessionTitle)
+    );
+    if (success) {
+      streamingStartTimeCache.set(moment().toISOString());
+      playbackCache.set({ title: sessionTitle });
+      setIsJoined(true);
     }
   };
 
@@ -100,6 +80,7 @@ export default function NewRecording() {
       setIsJoined(false);
       setIsOpen(true);
       leaveChannel();
+      playbackCache.set(null);
     } catch (e) {
       console.log(e);
     }
@@ -138,7 +119,7 @@ export default function NewRecording() {
                     }}
                   />
                   <Text style={{ fontSize: 15, fontWeight: "bold" }}>
-                    Recording
+                    Go Live
                   </Text>
                 </Pressable>
               ) : (
@@ -176,7 +157,7 @@ export default function NewRecording() {
           </BottomSheet>
         ) : (
           <>
-            <Text style={styles.timerLabel}>{timerVal}</Text>
+            {/* <Text style={styles.timerLabel}>{timerVal}</Text> */}
             <Pressable
               style={{
                 display: "flex",

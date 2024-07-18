@@ -63,9 +63,33 @@ export const formatTimer = (fromTimestamp) => {
   return `${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const parseSessionTitleToChannel = (title: string) => {
+export const parseSessionTitleToChannel = (title: string, reverse = false) => {
+  if (reverse) {
+    return title
+      .split("__")
+      .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
+      .join(" ");
+  }
   return title
     .toLowerCase()
     .replace(/ /g, "__")
     .replace(/[^a-zA-Z0-9_]/g, "");
+};
+
+export const matchText = (targetText, searchSpace) => {
+  if (!targetText || !searchSpace || !Array.isArray(searchSpace)) {
+    return [];
+  }
+
+  const matches = [];
+  const lowerTargetText = targetText.toLowerCase();
+  const regex = new RegExp(`\\b${lowerTargetText}\\b`, "i"); // Word boundary regex
+
+  for (const sentence of searchSpace) {
+    if (regex.test(sentence)) {
+      matches.push(sentence);
+    }
+  }
+
+  return matches;
 };

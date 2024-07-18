@@ -3,6 +3,7 @@ import createAgoraRtcEngine, {
   ChannelProfileType,
   ErrorCodeType,
   IRtcEngineEx,
+  RemoteAudioStats,
   RtcConnection,
   RtcStats,
   UserOfflineReasonType,
@@ -16,6 +17,12 @@ const useInitRtcEngine = (
   enableVideo: boolean = false,
   listenUserJoinOrLeave: boolean = true
 ) => {
+  if (!Config.appId) {
+    console.log(`appId is invalid`);
+    alert(`appId is invalid`);
+    return;
+  }
+
   const [appId] = useState(Config.appId);
   const [channelId, setChannelId] = useState("");
   const [token, setToken] = useState("");
@@ -147,6 +154,13 @@ const useInitRtcEngine = (
     [channelId, uid]
   );
 
+  const onRemoteAudioStats = useCallback(
+    (connection: RtcConnection, stats: RemoteAudioStats) => {
+      log.info("onRemoteAudioStats", "connection", connection, "stats", stats);
+    },
+    []
+  );
+
   useEffect(() => {
     (async () => {
       await initRtcEngine();
@@ -160,6 +174,7 @@ const useInitRtcEngine = (
 
   useEffect(() => {
     engine.current.addListener("onError", onError);
+    engine.current.addListener("onRemoteAudioStats", onRemoteAudioStats);
     engine.current.addListener("onJoinChannelSuccess", onJoinChannelSuccess);
     engine.current.addListener("onLeaveChannel", onLeaveChannel);
     if (listenUserJoinOrLeave) {
