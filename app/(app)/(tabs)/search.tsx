@@ -1,75 +1,77 @@
-import { FlatList, StyleSheet, View } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import TextInput from "@/components/UI/TextInput";
 import SearchTile from "@/components/SearchTile";
 import * as agoraApi from "@/agora/api";
-import { matchText, parseSessionTitleToChannel } from "@/utils";
-import useCache, { CACHE_KEYS } from "@/redux/useCache";
+import { matchText } from "@/utils";
+import moment from "moment";
+import { BroadcasterContext } from "@/context/broadcaster";
+
+type Channel = {
+  createdAt: any | null;
+  hostUid: string;
+  title: string;
+  channel_name: string;
+  channel_count: number;
+};
+
+const SEARCH_FIELDS = ["title"];
 
 export default function Search() {
   const [searchText, setSearchText] = useState("");
-  const [channelsList, setChannelsList] = useState([]);
-  const [searchedChannels, setSearchedChannels] = useState(channelsList);
-  const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+  const [channelsList, setChannelsList] = useState<Channel[]>([]);
+  const [searchedChannels, setSearchedChannels] =
+    useState<Channel[]>(channelsList);
+
+  const { joinChannelAsAudience } = useContext(BroadcasterContext);
 
   const fetchChannels = useCallback(async () => {
     const res = await agoraApi.getChannelsList();
 
-    const channels = res?.channels?.data?.channels?.map((c) => ({
-      ...c,
-      title: parseSessionTitleToChannel(c.channel_name, true),
-    }));
-
-    setChannelsList(channels);
-    performSearch(channels);
+    setChannelsList(res?.channels);
   }, []);
 
   useEffect(() => {
     fetchChannels();
-    const intervalId = setInterval(fetchChannels, 4000);
+    const intervalId = setInterval(fetchChannels, 3000);
     return () => clearInterval(intervalId);
   }, []);
 
-  const performSearch = useCallback(async (newlist = null) => {
-    if (!searchText) {
-      setSearchedChannels(channelsList);
-      return;
-    }
-    const searchSpace = newlist || channelsList;
+  const performSearch = useCallback(
+    (newlist = null) => {
+      if (!searchText) {
+        setSearchedChannels(channelsList);
+        return;
+      }
+      const searchSpace = newlist || channelsList;
 
-    const matchedList = matchText(
-      searchText,
-      searchSpace?.map((c) => c.title)
-    );
+      const matchedList = matchText(searchText, searchSpace, SEARCH_FIELDS);
+      console.log("channels: ", channelsList);
 
-    setSearchedChannels(
-      searchSpace.filter((c) => matchedList.includes(c.title))
-    );
-  }, []);
+      setSearchedChannels(matchedList);
+    },
+    [searchText, channelsList]
+  );
 
   useEffect(() => {
     performSearch();
-  }, [searchText]);
+  }, [searchText, channelsList]);
 
-  const handleClickSearchTile = (item) => {
-    const channelName = parseSessionTitleToChannel(item.title);
-    console.log("channelName: ", channelName);
+  const handleClickSearchTile = (item: Channel) => {
+    joinChannelAsAudience(item);
   };
 
   return (
     <View style={styles.container}>
       <View style={{ width: "100%", paddingHorizontal: 25 }}>
         <TextInput
-          placeholder="Search Live Broadcasts"
+          placeholder="Search for a live stream..."
           value={searchText}
           onChangeText={setSearchText}
         />
 
         <FlatList
-          data={channelsList.map((c) => ({
-            ...c,
-            title: parseSessionTitleToChannel(c.channel_name, true),
-          }))}
+          data={searchedChannels}
           style={{
             marginTop: 30,
             borderBottomWidth: 1,
@@ -77,7 +79,34 @@ export default function Search() {
           }}
           renderItem={({ item }) => (
             <SearchTile
-              title={item.title}
+              title={
+                <View
+                  style={{
+                    flexDirection: "row",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    width: "100%",
+                  }}
+                >
+                  <Text
+                    style={{ fontWeight: "bold", width: "100%", fontSize: 16 }}
+                  >
+                    {item.title || "Unnamed"}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "gray",
+                      textAlign: "right",
+                      width: "100%",
+                    }}
+                  >
+                    {moment(item.createdAt).fromNow()}
+                  </Text>
+                </View>
+              }
               onPress={() => {
                 handleClickSearchTile(item);
               }}

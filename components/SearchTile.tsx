@@ -4,7 +4,7 @@ import React from "react";
 export default function SearchTile({ title, onPress }: any) {
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <Text>{title}</Text>
+      {typeof title === "string" ? <Text>{title}</Text> : title}
     </Pressable>
   );
 }
@@ -14,6 +14,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: "grey",
     borderTopWidth: 1,
-    padding: 15,
+    padding: 10,
   },
 });

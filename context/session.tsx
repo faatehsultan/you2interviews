@@ -31,21 +31,21 @@ export function useSession() {
 export function SessionProvider(props: React.PropsWithChildren) {
   const [[isLoading, session], setSession] = useStorageState("session");
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (user) => {
-        if (user) {
-          setSession(JSON.stringify(user));
-        } else {
-          setSession(null);
-        }
-      },
-      (error) => {
-        setSession(null);
-      }
-    );
-  }, [auth.currentUser]);
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(
+  //     auth,
+  //     (user) => {
+  //       if (user) {
+  //         setSession(JSON.stringify(user));
+  //       } else {
+  //         setSession(null);
+  //       }
+  //     },
+  //     (error) => {
+  //       setSession(null);
+  //     }
+  //   );
+  // }, [auth.currentUser]);
 
   return (
     <AuthContext.Provider

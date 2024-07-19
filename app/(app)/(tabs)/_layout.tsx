@@ -1,14 +1,11 @@
 import BottomPlayback from "@/components/BottomPlayback";
 import HeaderPrimary from "@/components/HeaderPrimary";
 import { Colors } from "@/constants/Colors";
-import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Tabs } from "expo-router";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
 export default function TabLayout() {
-  const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
-
   return (
     <View style={{ flex: 1 }}>
       <Tabs
@@ -44,7 +41,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="contacts"
           options={{
-            title: "Contacts",
+            title: "Users",
             tabBarIcon: () => (
               <FontAwesome size={28} name="address-book" color="white" />
             ),
@@ -90,7 +87,7 @@ export default function TabLayout() {
       <View
         style={{
           position: "absolute",
-          bottom: 55,
+          bottom: 52.5,
           flex: 1,
           display: "flex",
           justifyContent: "center",
@@ -98,9 +95,7 @@ export default function TabLayout() {
           width: "100%",
         }}
       >
-        {playbackCache.get() && (
-          <BottomPlayback title={playbackCache.get().title} />
-        )}
+        <BottomPlayback />
       </View>
     </View>
   );

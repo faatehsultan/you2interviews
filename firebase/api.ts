@@ -4,7 +4,6 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   updateProfile,
-  getAuth,
 } from "firebase/auth";
 import { auth as base_auth } from ".";
 import { Response } from "@/types/response";

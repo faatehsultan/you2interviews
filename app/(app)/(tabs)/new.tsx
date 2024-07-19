@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   PermissionsAndroid,
   Platform,
   Pressable,
@@ -7,16 +8,13 @@ import {
   TextInput as TextInputNative,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
 import { useCallback, useRef } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
 import Button from "@/components/UI/Button";
-import { formatTimer, parseSessionTitleToChannel } from "@/utils";
-import useBroadcaster from "@/hooks/useBroadcaster";
-import useCache, { CACHE_KEYS } from "@/redux/useCache";
-import moment from "moment";
+import { BroadcasterContext } from "@/context/broadcaster";
 
 const getPermission = async () => {
   if (Platform.OS === "android") {
@@ -35,10 +33,10 @@ export default function NewRecording() {
   const [isOpen, setIsOpen] = useState(true);
   const [timerVal, setTimeVal] = useState("00:00");
 
-  const { joinChannelAsHost, leaveChannel } = useBroadcaster();
+  const { joinChannelAsHost, leaveChannel, isLoading } =
+    useContext(BroadcasterContext);
 
-  const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
-  const streamingStartTimeCache = useCache(CACHE_KEYS.STREAMING_START_TIME);
+  // const streamingStartTimeCache = useCache(CACHE_KEYS.STREAMING_START_TIME);
 
   const handleSheetChanges = useCallback((index: number) => {
     // console.log("handleSheetChanges", index);
@@ -50,27 +48,25 @@ export default function NewRecording() {
 
   const [isJoined, setIsJoined] = useState(false); // Whether the local user has joined the channel
 
-  useEffect(() => {
-    if (isJoined && streamingStartTimeCache.get()) {
-      const interval = setInterval(() => {
-        setTimeVal(formatTimer(Date.now() - streamingStartTimeCache.get()));
-      }, 1000);
+  // useEffect(() => {
+  //   if (isJoined && streamingStartTimeCache.value) {
+  //     const interval = setInterval(() => {
+  //       setTimeVal(formatTimer(Date.now() - streamingStartTimeCache.value));
+  //     }, 1000);
 
-      return () => clearInterval(interval);
-    }
-  }, [isJoined, streamingStartTimeCache]);
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [isJoined, streamingStartTimeCache]);
 
   const join = async () => {
     if (isJoined) {
       return;
     }
 
-    const success = await joinChannelAsHost(
-      parseSessionTitleToChannel(sessionTitle)
-    );
+    const success = await joinChannelAsHost(sessionTitle);
+
     if (success) {
-      streamingStartTimeCache.set(moment().toISOString());
-      playbackCache.set({ title: sessionTitle });
+      // streamingStartTimeCache.set(moment().toISOString());
       setIsJoined(true);
     }
   };
@@ -80,7 +76,6 @@ export default function NewRecording() {
       setIsJoined(false);
       setIsOpen(true);
       leaveChannel();
-      playbackCache.set(null);
     } catch (e) {
       console.log(e);
     }
@@ -181,11 +176,21 @@ export default function NewRecording() {
                 }}
               />
             </Pressable>
-            <Text style={{ fontSize: 10, marginTop: 20 }}>
-              Tap to {isJoined ? "Stop" : "Go Live"}
+            {!isLoading ? (
+              <Text style={{ fontSize: 10, marginTop: 20 }}>
+                Tap to {isJoined ? "Stop" : "Go Live"}
+              </Text>
+            ) : (
+              <ActivityIndicator
+                style={{ marginTop: 20 }}
+                size="large"
+                color={Colors.light.primary}
+              />
+            )}
+            <Text style={{ marginTop: 50, marginBottom: 20 }}>Session</Text>
+            <Text style={{ fontSize: 20, textAlign: "center" }}>
+              {sessionTitle}
             </Text>
-            <Text style={{ marginTop: 50 }}>Session</Text>
-            <Text style={{ fontSize: 20 }}>{sessionTitle}</Text>
             {!isJoined && (
               <Pressable onPress={leave} style={{ marginTop: 50 }}>
                 <Text

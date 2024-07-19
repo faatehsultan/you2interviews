@@ -1,33 +1,33 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setCache } from "./cache";
+import type { AppDispatch, RootState } from "./store";
+import { setCache } from "./slices/cache";
+
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
 
 export const CACHE_KEYS = {
   PLAYBACK: "playback",
+  BROADCASTER: "broadcaster",
   STREAMING_START_TIME: "streaming_start_time",
 };
 
-export default function useCache(key: string) {
-  const dispatch = useDispatch();
-  const cache = useSelector((state: any) => state.cache);
+const useCache = (key: string) => {
+  const dispatch = useAppDispatch();
+  const cache = useAppSelector((state) => state.cache.data);
 
-  const _get = () => {
-    return cache[key];
-  };
-  const _set = (value: any) => {
-    const newCache = cache;
-    newCache[key] = value;
-
-    dispatch(setCache(newCache));
-  };
-  const _clear = () => {
+  const setCacheWrapper = (value: any) =>
+    dispatch(
+      setCache({
+        ...cache,
+        [key]: value,
+      })
+    );
+  const clearCache = () => {
     const newCache = { ...cache };
     delete newCache[key];
     dispatch(setCache(newCache));
   };
+  return { cache: cache?.[key], setCache: setCacheWrapper, clearCache };
+};
 
-  return {
-    get: _get,
-    set: _set,
-    clear: _clear,
-  };
-}
+export default useCache;

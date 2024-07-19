@@ -1,6 +1,6 @@
 import { FieldProps } from "@/components/Form";
 import moment from "moment";
-
+import * as agoraApi from "@/agora/api";
 import { AgoraDropdownItem } from "@/components/UI";
 
 export const objectToItems = (object: any): AgoraDropdownItem[] => {
@@ -63,33 +63,59 @@ export const formatTimer = (fromTimestamp) => {
   return `${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const parseSessionTitleToChannel = (title: string, reverse = false) => {
-  if (reverse) {
-    return title
-      .split("__")
-      .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
-      .join(" ");
-  }
-  return title
-    .toLowerCase()
-    .replace(/ /g, "__")
-    .replace(/[^a-zA-Z0-9_]/g, "");
-};
-
-export const matchText = (targetText, searchSpace) => {
-  if (!targetText || !searchSpace || !Array.isArray(searchSpace)) {
-    return [];
-  }
-
-  const matches = [];
+export const matchText = (
+  targetText: string,
+  searchSpace: any[],
+  matcherProperties: string[]
+) => {
+  const matches: any = [];
   const lowerTargetText = targetText.toLowerCase();
   const regex = new RegExp(`\\b${lowerTargetText}\\b`, "i"); // Word boundary regex
 
-  for (const sentence of searchSpace) {
-    if (regex.test(sentence)) {
-      matches.push(sentence);
-    }
-  }
+  searchSpace.forEach((item) => {
+    matcherProperties.forEach((property) => {
+      let sentence = item[property] || item;
+
+      if (typeof sentence !== "string") return;
+
+      sentence = sentence.toLowerCase();
+      if (sentence.match(regex) || sentence.includes(lowerTargetText)) {
+        matches.push(item);
+      }
+    });
+  });
 
   return matches;
+};
+
+export const processChannelBeforeJoining = async (
+  channelTitle: string,
+  uid: string
+): Promise<{ channelName: string; token: string }> => {
+  // step 1: register channel title on firebase and get channel name
+  // step 2: ask for token for that channel name
+  // step 3: join channel with channel name
+
+  let channelName = "";
+  let token = "";
+
+  try {
+    channelName = await agoraApi.registerChannel(channelTitle, uid);
+
+    if (!channelName) {
+      throw new Error("Failed to register channel");
+    }
+
+    const tokenRes = await agoraApi.getAuthToken(channelName);
+
+    if (!tokenRes?.token) {
+      throw new Error("Failed to get token");
+    }
+
+    token = tokenRes?.token;
+  } catch (error) {
+    console.log("processChannelBeforeJoining error", error);
+  }
+
+  return { channelName, token };
 };

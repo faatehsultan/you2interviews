@@ -2,6 +2,7 @@ import { Redirect, Stack } from "expo-router";
 import { Text } from "react-native";
 import { useSession } from "../../context/session";
 import NonVerfiedEmailOverlay from "@/components/NonVerfiedEmailOverlay";
+import { BroadcasterProvider } from "@/context/broadcaster";
 
 export default function AppLayout() {
   const { session, isLoading } = useSession();
@@ -19,8 +20,10 @@ export default function AppLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <BroadcasterProvider>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </BroadcasterProvider>
   );
 }
