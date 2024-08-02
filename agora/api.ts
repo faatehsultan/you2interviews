@@ -6,10 +6,10 @@ import {
   ENDPOINT_USERS_LIST,
 } from "@/constants/api";
 
-export const getAuthToken = async (channelName: string) => {
+export const getAuthToken = async (channelName: string, uid: string) => {
   try {
     const response = await fetch(
-      `${BACKEND_URL}${ENDPOINT_NEW_TOKEN}?channel=${channelName}`
+      `${BACKEND_URL}${ENDPOINT_NEW_TOKEN}?channel=${channelName}&uid=${uid}`
     );
 
     const data = await response.json();

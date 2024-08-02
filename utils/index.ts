@@ -106,7 +106,7 @@ export const processChannelBeforeJoining = async (
       throw new Error("Failed to register channel");
     }
 
-    const tokenRes = await agoraApi.getAuthToken(channelName);
+    const tokenRes = await agoraApi.getAuthToken(channelName, uid);
 
     if (!tokenRes?.token) {
       throw new Error("Failed to get token");

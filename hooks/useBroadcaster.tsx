@@ -31,12 +31,14 @@ export default function useBroadcaster() {
     console.log("joinChannel requested HOST: ", channelTitle);
 
     setLoading(true);
+
+    console.log("----- start requesting channel live for uid: ", uid);
     const { channelName, token } = await processChannelBeforeJoining(
       channelTitle,
       uid
     );
 
-    if (token && channelName) {
+    if (token && channelName && uid) {
       setChannelId(channelName);
       setToken(token);
 
@@ -71,7 +73,7 @@ export default function useBroadcaster() {
     console.log("joinChannel requested AUDIENCE: ", channelObj.channel_name);
 
     setLoading(true);
-    const tokenRes = await agoraApi.getAuthToken(channelObj.channel_name);
+    const tokenRes = await agoraApi.getAuthToken(channelObj.channel_name, uid);
 
     if (tokenRes?.token && channelObj.channel_name) {
       setChannelId(channelObj.channel_name);
