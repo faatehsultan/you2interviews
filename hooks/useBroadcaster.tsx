@@ -63,6 +63,7 @@ export default function useBroadcaster() {
           title: channelTitle,
           channel_name: channelName,
           is_host: true,
+          numeric_uid: uid,
         });
 
         toggleMutePlayback(true);

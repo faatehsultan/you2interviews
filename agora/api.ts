@@ -1,8 +1,10 @@
 import {
   BACKEND_URL,
+  ENDPOINT_AUTO_RECORD,
   ENDPOINT_CHANNEL_LIST,
   ENDPOINT_CHANNEL_REGISTER,
   ENDPOINT_NEW_TOKEN,
+  ENDPOINT_STOP_RECORD,
   ENDPOINT_USERS_LIST,
 } from "@/constants/api";
 
@@ -46,6 +48,37 @@ export const registerChannel = async (channel: string, uid: string) => {
   try {
     const response = await fetch(
       `${BACKEND_URL}${ENDPOINT_CHANNEL_REGISTER}?channel=${channel}&uid=${uid}`
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const startAutoRecording = async (channelName: string, uid: string) => {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}${ENDPOINT_AUTO_RECORD}?channel=${channelName}&uid=${uid}`
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const stopRecording = async (
+  channelName: string,
+  uid: string,
+  sid: string,
+  resource_id: string
+) => {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}${ENDPOINT_STOP_RECORD}?channel=${channelName}&uid=${uid}&sid=${sid}&resource_id=${resource_id}`
     );
 
     const data = await response.json();

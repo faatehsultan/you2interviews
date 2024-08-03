@@ -7,6 +7,7 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 
 export const CACHE_KEYS = {
   PLAYBACK: "playback",
+  RECORDING: "recording",
   BROADCASTER: "broadcaster",
   STREAMING_START_TIME: "streaming_start_time",
 };

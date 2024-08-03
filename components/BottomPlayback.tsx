@@ -1,5 +1,5 @@
 import { Text, View, Image } from "react-native";
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Colors } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import useCache, { CACHE_KEYS } from "@/redux/useCache";
@@ -9,6 +9,7 @@ const MAX_TITLE_LENGTH = 32;
 
 export default function BottomPlayback() {
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+  const recordingCache = useCache(CACHE_KEYS.RECORDING);
 
   const { leaveChannel, toggleMutePlayback, toggleMuteRecording } =
     useContext(BroadcasterContext);
@@ -91,6 +92,7 @@ export default function BottomPlayback() {
             <Ionicons name="volume-high" color="gray" size={11} />
           </View>
         </View>
+        {recordingCache?.cache?.sid && <RecordingFlashIcon />}
         <Ionicons.Button
           name={getMuteIcon()}
           color={Colors.light.primary}
@@ -111,3 +113,24 @@ export default function BottomPlayback() {
     )
   );
 }
+
+const RecordingFlashIcon = () => {
+  const [iconOpacity, setIconOpacity] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIconOpacity((prev) => Math.floor(((prev + 0.1) % 1) * 100) / 100);
+    }, 150);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <Ionicons
+      name="radio-button-on-outline"
+      color="red"
+      size={25}
+      style={{ opacity: iconOpacity }}
+    />
+  );
+};
