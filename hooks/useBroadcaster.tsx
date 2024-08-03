@@ -1,7 +1,7 @@
 import useInitRtcEngine from "./useInitRtcEngine";
 import { ClientRoleType } from "react-native-agora";
 import * as agoraApi from "@/agora/api";
-import { processChannelBeforeJoining } from "@/utils";
+import { alphanumericToNumericUID, processChannelBeforeJoining } from "@/utils";
 import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import { useEffect, useState } from "react";
 
@@ -11,7 +11,8 @@ export default function useBroadcaster() {
     setChannelId,
     token,
     setToken,
-    uid,
+    uid: _uid,
+    setUid,
     joinChannelSuccess,
     remoteUsers,
     engine,
@@ -20,6 +21,8 @@ export default function useBroadcaster() {
   const [loading, setLoading] = useState(false);
 
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+
+  const uid = alphanumericToNumericUID(_uid);
 
   const joinChannelAsHost = async (channelTitle: string) => {
     if (!channelTitle) {
@@ -38,25 +41,38 @@ export default function useBroadcaster() {
       uid
     );
 
+    console.log("Channel Title and Token: ", channelName, token);
+
     if (token && channelName && uid) {
       setChannelId(channelName);
       setToken(token);
+      setUid(uid);
 
-      engine.current.joinChannel(token, channelName, uid, {
-        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-        autoSubscribeAudio: false,
-      });
+      const successZero = engine.current.joinChannel(
+        token,
+        channelName,
+        parseInt(uid),
+        {
+          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+          autoSubscribeAudio: false,
+        }
+      );
 
-      playbackCache.setCache({
-        title: channelTitle,
-        channel_name: channelName,
-        is_host: true,
-      });
+      if (successZero === 0) {
+        playbackCache.setCache({
+          title: channelTitle,
+          channel_name: channelName,
+          is_host: true,
+        });
 
-      toggleMutePlayback(true);
+        toggleMutePlayback(true);
+
+        setLoading(false);
+        return true;
+      }
 
       setLoading(false);
-      return true;
+      return false;
     }
 
     setLoading(false);
@@ -96,6 +112,7 @@ export default function useBroadcaster() {
 
       toggleMuteRecording(true);
 
+      console.log("==== joinChannelSuccess", joinChannelSuccess);
       setLoading(false);
       return true;
     }

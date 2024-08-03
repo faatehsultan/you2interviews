@@ -12,6 +12,7 @@ import createAgoraRtcEngine, {
 import Config from "@/config/agora.config";
 import * as log from "@/utils/log";
 import { askMediaAccess } from "@/utils/permissions";
+import { useSession } from "@/context/session";
 
 const useInitRtcEngine = (
   enableVideo: boolean = false,
@@ -26,7 +27,10 @@ const useInitRtcEngine = (
   const [appId] = useState(Config.appId);
   const [channelId, setChannelId] = useState("");
   const [token, setToken] = useState("");
-  const [uid, setUid] = useState(Config.uid);
+
+  const { session } = useSession();
+  const [uid, setUid] = useState(session?.uid);
+
   const [joinChannelSuccess, setJoinChannelSuccess] = useState(false);
   const [remoteUsers, setRemoteUsers] = useState<number[]>([]);
   const [startPreview, setStartPreview] = useState(false);
@@ -38,12 +42,15 @@ const useInitRtcEngine = (
       log.error(`appId is invalid`);
     }
 
-    engine.current.initialize({
+    const success = engine.current.initialize({
       appId,
       logConfig: { filePath: Config.logFilePath },
       // Should use ChannelProfileLiveBroadcasting on most of cases
-      channelProfile: ChannelProfileType.ChannelProfileLiveBroadcasting,
+      channelProfile: ChannelProfileType.ChannelProfileCommunication,
     });
+
+    console.log("initRtcEngine successSS: ", success);
+
 
     // Need granted the microphone permission
     await askMediaAccess(["android.permission.RECORD_AUDIO"]);
@@ -80,7 +87,7 @@ const useInitRtcEngine = (
       );
       if (
         connection.channelId === channelId &&
-        (connection.localUid === uid || uid === 0)
+        (connection.localUid === uid || uid === "0")
       ) {
         setJoinChannelSuccess(true);
       }
@@ -93,7 +100,7 @@ const useInitRtcEngine = (
       log.info("onLeaveChannel", "connection", connection, "stats", stats);
       if (
         connection.channelId === channelId &&
-        (connection.localUid === uid || uid === 0)
+        (connection.localUid === uid || uid === "0")
       ) {
         setJoinChannelSuccess(false);
         setRemoteUsers([]);
@@ -115,7 +122,7 @@ const useInitRtcEngine = (
       );
       if (
         connection.channelId === channelId &&
-        (connection.localUid === uid || uid === 0)
+        (connection.localUid === uid || uid === "0")
       ) {
         setRemoteUsers((prev) => {
           if (prev === undefined) return [];
@@ -143,7 +150,7 @@ const useInitRtcEngine = (
       );
       if (
         connection.channelId === channelId &&
-        (connection.localUid === uid || uid === 0)
+        (connection.localUid === uid || uid === "0")
       ) {
         setRemoteUsers((prev) => {
           if (prev === undefined) return [];

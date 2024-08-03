@@ -2,6 +2,10 @@ import { FieldProps } from "@/components/Form";
 import moment from "moment";
 import * as agoraApi from "@/agora/api";
 import { AgoraDropdownItem } from "@/components/UI";
+import crc32 from "crc-32";
+
+export const alphanumericToNumericUID = (alphanumericUID: string) =>
+  alphanumericUID === "0" ? "0" : (crc32.str(alphanumericUID) >>> 0).toString();
 
 export const objectToItems = (object: any): AgoraDropdownItem[] => {
   return Object.keys(object).map((value) => {
@@ -42,7 +46,7 @@ export const getInitialFormFields = (fields_list: Array<FieldProps>) => {
   return fields;
 };
 
-export const formatTimer = (fromTimestamp) => {
+export const formatTimer = (fromTimestamp: any) => {
   // Get the current time
   const now = moment();
 

@@ -6,6 +6,9 @@ import * as agoraApi from "@/agora/api";
 import { matchText } from "@/utils";
 import moment from "moment";
 import { BroadcasterContext } from "@/context/broadcaster";
+import useCache, { CACHE_KEYS } from "@/redux/useCache";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { Colors } from "react-native/Libraries/NewAppScreen";
 
 type Channel = {
   createdAt: any | null;
@@ -22,6 +25,12 @@ export default function Search() {
   const [channelsList, setChannelsList] = useState<Channel[]>([]);
   const [searchedChannels, setSearchedChannels] =
     useState<Channel[]>(channelsList);
+
+  const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+
+  const isChannelCurrentlyJoined = (channelName: string) => {
+    return playbackCache.cache?.channel_name === channelName;
+  };
 
   const { joinChannelAsAudience } = useContext(BroadcasterContext);
 
@@ -94,6 +103,14 @@ export default function Search() {
                     style={{ fontWeight: "bold", width: "100%", fontSize: 16 }}
                   >
                     {item.title || "Unnamed"}
+                    {"  "}
+                    {isChannelCurrentlyJoined(item.channel_name) && (
+                      <FontAwesome
+                        name="check"
+                        size={18}
+                        color={Colors.primary}
+                      />
+                    )}
                   </Text>
                   <Text
                     style={{
@@ -108,7 +125,9 @@ export default function Search() {
                 </View>
               }
               onPress={() => {
-                handleClickSearchTile(item);
+                if (!isChannelCurrentlyJoined(item.channel_name)) {
+                  handleClickSearchTile(item);
+                }
               }}
             />
           )}
