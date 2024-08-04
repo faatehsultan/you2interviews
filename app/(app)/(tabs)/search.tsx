@@ -1,6 +1,12 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import TextInput from "@/components/UI/TextInput";
 import SearchTile from "@/components/SearchTile";
 import * as agoraApi from "@/agora/api";
 import { matchText } from "@/utils";
@@ -8,7 +14,7 @@ import moment from "moment";
 import { BroadcasterContext } from "@/context/broadcaster";
 import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Colors } from "@/constants/Colors";
 
 type Channel = {
   createdAt: any | null;
@@ -20,7 +26,11 @@ type Channel = {
 
 const SEARCH_FIELDS = ["title"];
 
+const TABS_LIST = ["Live", "Recorded"];
+
 export default function Search() {
+  const [activeTab, setActiveTab] = useState(TABS_LIST[0]);
+
   const [searchText, setSearchText] = useState("");
   const [channelsList, setChannelsList] = useState<Channel[]>([]);
   const [searchedChannels, setSearchedChannels] =
@@ -72,20 +82,36 @@ export default function Search() {
 
   return (
     <View style={styles.container}>
-      <View style={{ width: "100%", paddingHorizontal: 25 }}>
+      <View
+        style={{
+          paddingHorizontal: 20,
+          width: "100%",
+          backgroundColor: "white",
+        }}
+      >
         <TextInput
           placeholder="Search for a live stream..."
           value={searchText}
           onChangeText={setSearchText}
+          style={styles.searchBar}
         />
-
+      </View>
+      <View style={styles.tabContainer}>
+        {TABS_LIST.map((item, idx) => (
+          <Pressable
+            style={[styles.tab, activeTab == item && styles.activeTab]}
+            onPress={() => {
+              setActiveTab(item);
+            }}
+            key={idx}
+          >
+            <Text style={styles.tabText}>{item}</Text>
+          </Pressable>
+        ))}
+      </View>
+      <View style={{ width: "100%", paddingHorizontal: 25 }}>
         <FlatList
           data={searchedChannels}
-          style={{
-            marginTop: 30,
-            borderBottomWidth: 1,
-            borderBottomColor: "gray",
-          }}
           renderItem={({ item }) => (
             <SearchTile
               title={
@@ -104,11 +130,11 @@ export default function Search() {
                   >
                     {item.title || "Unnamed"}
                     {"  "}
-                    {isChannelCurrentlyJoined(item.channel_name) && (
+                    {isChannelCurrentlyJoined(item?.channel_name) && (
                       <FontAwesome
                         name="check"
                         size={18}
-                        color={Colors.primary}
+                        color={Colors.light.primary}
                       />
                     )}
                   </Text>
@@ -120,12 +146,12 @@ export default function Search() {
                       width: "100%",
                     }}
                   >
-                    {moment(item.createdAt).fromNow()}
+                    {moment(item?.createdAt).fromNow()}
                   </Text>
                 </View>
               }
               onPress={() => {
-                if (!isChannelCurrentlyJoined(item.channel_name)) {
+                if (!isChannelCurrentlyJoined(item?.channel_name)) {
                   handleClickSearchTile(item);
                 }
               }}
@@ -144,5 +170,38 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "flex-start",
     alignItems: "center",
+  },
+  tabContainer: {
+    paddingVertical: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    backgroundColor: "white",
+    paddingHorizontal: 25,
+    gap: 25,
+  },
+  tab: {
+    paddingVertical: 7,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "lightgray",
+    borderWidth: 1,
+    borderRadius: 100,
+    backgroundColor: "white",
+  },
+  activeTab: {
+    backgroundColor: "rgba(8, 34, 183, 0.2)",
+  },
+  tabText: {
+    fontWeight: "bold",
+  },
+  searchBar: {
+    width: "100%",
+    padding: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "white",
+    borderColor: "lightgray",
+    borderWidth: 1,
+    borderRadius: 50,
   },
 });
