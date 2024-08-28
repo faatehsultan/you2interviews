@@ -15,6 +15,7 @@ import { BroadcasterContext } from "@/context/broadcaster";
 import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
+import Toast from "react-native-root-toast";
 
 type Channel = {
   createdAt: any | null;
@@ -26,12 +27,20 @@ type Channel = {
 
 const SEARCH_FIELDS = ["title"];
 
-const TABS_LIST = ["Live", "Recorded"];
+const TABS_LIST = ["live", "recorded"];
 
 export default function Search() {
   const [activeTab, setActiveTab] = useState(TABS_LIST[0]);
 
   const [searchText, setSearchText] = useState("");
+  const [baseChannelList, setBaseChannelsList] = useState<{
+    live: Channel[];
+    recorded: Channel[];
+  }>({
+    live: [],
+    recorded: [],
+  });
+
   const [channelsList, setChannelsList] = useState<Channel[]>([]);
   const [searchedChannels, setSearchedChannels] =
     useState<Channel[]>(channelsList);
@@ -47,7 +56,7 @@ export default function Search() {
   const fetchChannels = useCallback(async () => {
     const res = await agoraApi.getChannelsList();
 
-    setChannelsList(res?.channels);
+    setBaseChannelsList(res);
   }, []);
 
   useEffect(() => {
@@ -76,8 +85,20 @@ export default function Search() {
     performSearch();
   }, [searchText, channelsList]);
 
+  useEffect(() => {
+    if (baseChannelList) {
+      setChannelsList(baseChannelList?.[activeTab]);
+    }
+  }, [activeTab, baseChannelList]);
+
   const handleClickSearchTile = (item: Channel) => {
-    joinChannelAsAudience(item);
+    if (activeTab === "live") {
+      joinChannelAsAudience(item);
+    } else {
+      // handle playing a recorded channel audio stream
+      Toast.show("Recorded channels are not supported yet");
+      console.log("User: ", item);
+    }
   };
 
   return (
@@ -105,7 +126,7 @@ export default function Search() {
             }}
             key={idx}
           >
-            <Text style={styles.tabText}>{item}</Text>
+            <Text style={styles.tabText}>{item?.toUpperCase()}</Text>
           </Pressable>
         ))}
       </View>
