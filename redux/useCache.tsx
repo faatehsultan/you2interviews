@@ -10,6 +10,7 @@ export const CACHE_KEYS = {
   RECORDING: "recording",
   BROADCASTER: "broadcaster",
   STREAMING_START_TIME: "streaming_start_time",
+  CLOUD_PLAY_FILE: "cloud_play_file",
 };
 
 const useCache = (key: string) => {

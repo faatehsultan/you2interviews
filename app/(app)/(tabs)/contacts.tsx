@@ -4,9 +4,10 @@ import TextInput from "@/components/UI/TextInput";
 import SearchTile from "@/components/SearchTile";
 import * as agoraApi from "@/agora/api";
 import { matchText } from "@/utils";
+import { useSession } from "@/context/session";
 
 type User = {
-  uid: number;
+  uid: number | string;
   email: string;
   displayName: string;
   emailVerified: boolean;
@@ -19,6 +20,7 @@ export default function Contacts() {
   const [searchText, setSearchText] = useState("");
   const [usersList, setUsersList] = useState<User[]>([]);
   const [searchedUsers, setSearchedUsers] = useState<User[]>(usersList);
+  const { session } = useSession();
 
   const fetchUsers = useCallback(async () => {
     const res = await agoraApi.getUsersList();
@@ -75,8 +77,11 @@ export default function Contacts() {
             <SearchTile
               title={
                 <>
-                  <Text style={{ fontWeight: "bold" }}>
-                    {item.displayName || "Unnamed"}
+                  <Text>
+                    <Text style={{ fontWeight: "bold" }}>
+                      {item.displayName || "Unnamed"}
+                    </Text>
+                    <Text>{session?.uid === item.uid ? " (You)" : ""}</Text>
                   </Text>
                   <Text> ({item.email})</Text>
                 </>

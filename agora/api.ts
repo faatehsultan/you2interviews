@@ -3,6 +3,7 @@ import {
   ENDPOINT_AUTO_RECORD,
   ENDPOINT_CHANNEL_LIST,
   ENDPOINT_CHANNEL_REGISTER,
+  ENDPOINT_FILE_MP3_RECORDED_CHANNEL,
   ENDPOINT_NEW_TOKEN,
   ENDPOINT_STOP_RECORD,
   ENDPOINT_USERS_LIST,
@@ -79,6 +80,19 @@ export const stopRecording = async (
   try {
     const response = await fetch(
       `${BACKEND_URL}${ENDPOINT_STOP_RECORD}?channel=${channelName}&uid=${uid}&sid=${sid}&resource_id=${resource_id}`
+    );
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getMp3RecordedFile = async (channel: string) => {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}${ENDPOINT_FILE_MP3_RECORDED_CHANNEL}?channel=${channel}`
     );
 
     const data = await response.json();

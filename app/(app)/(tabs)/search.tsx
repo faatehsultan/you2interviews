@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   FlatList,
   Pressable,
   StyleSheet,
@@ -16,6 +17,8 @@ import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
 import Toast from "react-native-root-toast";
+import useRecordedPlayer from "@/hooks/useRecordedPlayer";
+import Button from "@/components/UI/Button";
 
 type Channel = {
   createdAt: any | null;
@@ -45,7 +48,13 @@ export default function Search() {
   const [searchedChannels, setSearchedChannels] =
     useState<Channel[]>(channelsList);
 
+  const [fetchingRecordedData, setFetchingRecordedData] =
+    useState<Boolean>(false);
+
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
+  const cloudPlayFile = useCache(CACHE_KEYS.CLOUD_PLAY_FILE);
+
+  const { play, pause, stop, isPlaying } = useRecordedPlayer();
 
   const isChannelCurrentlyJoined = (channelName: string) => {
     return playbackCache.cache?.channel_name === channelName;
@@ -91,13 +100,22 @@ export default function Search() {
     }
   }, [activeTab, baseChannelList]);
 
-  const handleClickSearchTile = (item: Channel) => {
+  const handleClickSearchTile = async (item: Channel) => {
     if (activeTab === "live") {
       joinChannelAsAudience(item);
     } else {
-      // handle playing a recorded channel audio stream
-      Toast.show("Recorded channels are not supported yet");
-      console.log("User: ", item);
+      setFetchingRecordedData(true);
+      const playableMp3File = await agoraApi.getMp3RecordedFile(
+        item?.channel_name
+      );
+
+      console.log("==== file-=-=---", playableMp3File);
+
+      if (playableMp3File && playableMp3File?.url) {
+        cloudPlayFile.setCache(playableMp3File);
+      }
+
+      setFetchingRecordedData(false);
     }
   };
 
@@ -132,7 +150,11 @@ export default function Search() {
       </View>
       <View style={{ width: "100%", paddingHorizontal: 25 }}>
         <FlatList
-          data={searchedChannels}
+          data={
+            searchedChannels?.sort((a, b) =>
+              moment(b.createdAt).diff(moment(a.createdAt))
+            ) || []
+          }
           renderItem={({ item }) => (
             <SearchTile
               title={
@@ -140,16 +162,18 @@ export default function Search() {
                   style={{
                     flexDirection: "row",
                     display: "flex",
-                    flexWrap: "wrap",
+                    flexWrap: !fetchingRecordedData ? "wrap" : "wrap",
                     justifyContent: "space-between",
                     alignItems: "center",
                     width: "100%",
                   }}
                 >
                   <Text
-                    style={{ fontWeight: "bold", width: "100%", fontSize: 16 }}
+                    style={{ fontWeight: "bold", width: "85%", fontSize: 16 }}
                   >
-                    {item.title || "Unnamed"}
+                    {item.title.length > 40
+                      ? `${item.title.slice(0, 37)}...`
+                      : item.title || "Unnamed"}
                     {"  "}
                     {isChannelCurrentlyJoined(item?.channel_name) && (
                       <FontAwesome
@@ -159,6 +183,7 @@ export default function Search() {
                       />
                     )}
                   </Text>
+                  {fetchingRecordedData && <ActivityIndicator size="small" />}
                   <Text
                     style={{
                       fontSize: 12,
@@ -171,13 +196,24 @@ export default function Search() {
                   </Text>
                 </View>
               }
-              onPress={() => {
-                if (!isChannelCurrentlyJoined(item?.channel_name)) {
-                  handleClickSearchTile(item);
+              onPress={async () => {
+                if (
+                  !isChannelCurrentlyJoined(item?.channel_name) &&
+                  !fetchingRecordedData
+                ) {
+                  await handleClickSearchTile(item);
+                } else {
+                  Toast.show("Exit the currently joined channel first!");
                 }
               }}
             />
           )}
+        />
+        <Button
+          title={isPlaying ? "pause" : "play"}
+          onPress={() => {
+            isPlaying ? pause() : play();
+          }}
         />
       </View>
     </View>
