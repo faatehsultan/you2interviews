@@ -1,15 +1,24 @@
 import { Text, View, Image } from "react-native";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Colors } from "@/constants/Colors";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import { BroadcasterContext } from "@/context/broadcaster";
+import useRecordedPlayer from "@/hooks/useRecordedPlayer";
 
 const MAX_TITLE_LENGTH = 32;
 
 export default function BottomPlayback() {
+  const { play, pause, stop, isPlaying, isPaused } = useRecordedPlayer();
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
   const recordingCache = useCache(CACHE_KEYS.RECORDING);
+  const cloudPlayCache = useCache(CACHE_KEYS.CLOUD_PLAY_FILE);
 
   const { leaveChannel, toggleMutePlayback, toggleMuteRecording } =
     useContext(BroadcasterContext);
@@ -34,8 +43,21 @@ export default function BottomPlayback() {
     return playbackCache.cache?.is_muted ? "volume-mute" : "volume-high";
   }, [playbackCache?.cache]);
 
+  const showComp = useMemo(() => {
+    if (!playbackCache?.cache) return false;
+    if (playbackCache?.cache?.type == "live") return true;
+    if (playbackCache?.cache?.type == "recorded" && true) return true;
+    return false;
+  }, [playbackCache?.cache, isPlaying]);
+
+  useEffect(() => {
+    if (playbackCache?.cache && cloudPlayCache?.cache) {
+      play();
+    }
+  }, [playbackCache.cache, cloudPlayCache.cache]);
+
   return (
-    playbackCache?.cache && (
+    showComp && (
       <View
         style={{
           flexDirection: "row",
@@ -53,13 +75,13 @@ export default function BottomPlayback() {
         <Image
           source={require("../assets/images/wave-sound.png")}
           style={{
-            width: 30,
-            height: 30,
+            width: 25,
+            height: 25,
             tintColor: Colors.light.primary,
             marginRight: 10,
           }}
         />
-        <View style={{ width: "67%" }}>
+        <View style={{ width: "65%" }}>
           <Text
             style={{
               fontSize: 14,
@@ -81,33 +103,60 @@ export default function BottomPlayback() {
               gap: 5,
             }}
           >
-            <Text
-              style={{
-                fontSize: 11,
-                color: "gray",
-              }}
-            >
-              Host
-            </Text>
-            <Ionicons name="volume-high" color="gray" size={11} />
+            {playbackCache?.cache?.is_host &&
+              playbackCache?.cache?.type == "live" && (
+                <>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: "gray",
+                    }}
+                  >
+                    Host
+                  </Text>
+                  <Ionicons name="volume-high" color="gray" size={11} />
+                </>
+              )}
           </View>
         </View>
         {recordingCache?.cache?.sid && <RecordingFlashIcon />}
-        <Ionicons.Button
-          name={getMuteIcon()}
-          color={Colors.light.primary}
-          backgroundColor="transparent"
-          size={23}
-          onPress={handleMute}
-        />
-        {!playbackCache?.cache?.is_host && (
-          <Ionicons.Button
-            name="power"
-            color={Colors.light.primary}
-            backgroundColor="transparent"
-            size={23}
-            onPress={leaveChannel}
-          />
+        {playbackCache?.cache?.type == "live" && (
+          <>
+            <Ionicons.Button
+              name={getMuteIcon()}
+              color={Colors.light.primary}
+              backgroundColor="transparent"
+              size={23}
+              onPress={handleMute}
+            />
+            {!playbackCache?.cache?.is_host && (
+              <Ionicons.Button
+                name="power"
+                color={Colors.light.primary}
+                backgroundColor="transparent"
+                size={23}
+                onPress={leaveChannel}
+              />
+            )}
+          </>
+        )}
+        {playbackCache?.cache?.type == "recorded" && (
+          <>
+            <Ionicons.Button
+              name={!isPaused ? "pause" : "play"}
+              color={Colors.light.primary}
+              backgroundColor="transparent"
+              size={23}
+              onPress={!isPaused ? pause : play}
+            />
+            <Ionicons.Button
+              name="stop"
+              color={Colors.light.primary}
+              backgroundColor="transparent"
+              size={23}
+              onPress={stop}
+            />
+          </>
         )}
       </View>
     )

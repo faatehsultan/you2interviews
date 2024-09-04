@@ -17,8 +17,6 @@ import useCache, { CACHE_KEYS } from "@/redux/useCache";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
 import Toast from "react-native-root-toast";
-import useRecordedPlayer from "@/hooks/useRecordedPlayer";
-import Button from "@/components/UI/Button";
 
 type Channel = {
   createdAt: any | null;
@@ -53,8 +51,6 @@ export default function Search() {
 
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
   const cloudPlayFile = useCache(CACHE_KEYS.CLOUD_PLAY_FILE);
-
-  const { play, pause, stop, isPlaying } = useRecordedPlayer();
 
   const isChannelCurrentlyJoined = (channelName: string) => {
     return playbackCache.cache?.channel_name === channelName;
@@ -112,7 +108,16 @@ export default function Search() {
       console.log("==== file-=-=---", playableMp3File);
 
       if (playableMp3File && playableMp3File?.url) {
-        cloudPlayFile.setCache(playableMp3File);
+        const finalMp3 = {
+          ...playableMp3File,
+          url: playableMp3File?.url?.split("?")[0],
+        };
+        cloudPlayFile.setCache(finalMp3);
+        playbackCache.setCache({
+          title: item?.title,
+          type: "recorded",
+        });
+        Toast.show("Session Buffering...");
       }
 
       setFetchingRecordedData(false);
@@ -208,12 +213,6 @@ export default function Search() {
               }}
             />
           )}
-        />
-        <Button
-          title={isPlaying ? "pause" : "play"}
-          onPress={() => {
-            isPlaying ? pause() : play();
-          }}
         />
       </View>
     </View>

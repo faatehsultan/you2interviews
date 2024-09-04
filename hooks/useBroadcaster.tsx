@@ -64,6 +64,7 @@ export default function useBroadcaster() {
           channel_name: channelName,
           is_host: true,
           numeric_uid: uid,
+          type: "live",
         });
 
         toggleMutePlayback(true);
@@ -109,6 +110,7 @@ export default function useBroadcaster() {
         title: channelObj.title,
         channel_name: channelObj.channel_name,
         is_host: false,
+        type: "live",
       });
 
       toggleMuteRecording(true);
