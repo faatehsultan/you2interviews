@@ -125,11 +125,11 @@ export default function useBroadcaster() {
   };
 
   const toggleMutePlayback = (mute: boolean) => {
-    engine.current.adjustPlaybackSignalVolume(mute ? 0 : 100);
+    // engine.current.adjustPlaybackSignalVolume(mute ? 0 : 100);
   };
 
   const toggleMuteRecording = (mute: boolean) => {
-    engine.current.muteRecordingSignal(mute);
+    // engine.current.muteRecordingSignal(mute);
   };
 
   const leaveChannel = () => {

@@ -48,6 +48,7 @@ export default function Search() {
 
   const [fetchingRecordedData, setFetchingRecordedData] =
     useState<Boolean>(false);
+  const [fetchingChannelId, setFetchingChannelId] = useState<string>("");
 
   const playbackCache = useCache(CACHE_KEYS.PLAYBACK);
   const cloudPlayFile = useCache(CACHE_KEYS.CLOUD_PLAY_FILE);
@@ -72,13 +73,25 @@ export default function Search() {
 
   const performSearch = useCallback(
     (newlist = null) => {
-      if (!searchText) {
-        setSearchedChannels(channelsList);
-        return;
-      }
       const searchSpace = newlist || channelsList;
 
-      const matchedList = matchText(searchText, searchSpace, SEARCH_FIELDS);
+      const matchedList = (
+        !searchText
+          ? matchText(searchText, searchSpace, SEARCH_FIELDS)
+          : channelsList
+      )?.filter((channel: Channel) => {
+        if (activeTab === "recorded") {
+          if (
+            baseChannelList?.["live"]?.find(
+              (item) => item?.channel_name === channel?.channel_name
+            )
+          ) {
+            return false;
+          }
+        }
+
+        return true;
+      });
       console.log("channels: ", channelsList);
 
       setSearchedChannels(matchedList);
@@ -101,6 +114,7 @@ export default function Search() {
       joinChannelAsAudience(item);
     } else {
       setFetchingRecordedData(true);
+      setFetchingChannelId(item?.channel_name);
       const playableMp3File = await agoraApi.getMp3RecordedFile(
         item?.channel_name
       );
@@ -121,6 +135,7 @@ export default function Search() {
       }
 
       setFetchingRecordedData(false);
+      setFetchingChannelId("");
     }
   };
 
@@ -188,7 +203,10 @@ export default function Search() {
                       />
                     )}
                   </Text>
-                  {fetchingRecordedData && <ActivityIndicator size="small" />}
+                  {fetchingRecordedData &&
+                    fetchingChannelId === item?.channel_name && (
+                      <ActivityIndicator size="small" />
+                    )}
                   <Text
                     style={{
                       fontSize: 12,
