@@ -35,29 +35,31 @@ export default function Root() {
 }
 
 const RootComponent = () => {
-  const envCache = useCache(CACHE_KEYS.ENV);
-  const [loadingEnv, setLoadingEnv] = useState(true);
+  // const envCache = useCache(CACHE_KEYS.ENV);
+  // const [loadingEnv, setLoadingEnv] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      setLoadingEnv(true);
-      const envVars = await apiGetDynamicEnvVars();
-      envCache.setCache(envVars);
-      setLoadingEnv(false);
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     setLoadingEnv(true);
+  //     const envVars = await apiGetDynamicEnvVars();
+  //     envCache.setCache(envVars);
+  //     setLoadingEnv(false);
+  //   })();
+  // }, []);
 
-  return loadingEnv ? (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <ActivityIndicator
-        size="large"
-        color={Colors.light.primary}
-        style={{ flex: 1 }}
-      />
-    </View>
-  ) : (
-    <Slot />
-  );
+  // return loadingEnv ? (
+  //   <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //     <ActivityIndicator
+  //       size="large"
+  //       color={Colors.light.primary}
+  //       style={{ flex: 1 }}
+  //     />
+  //   </View>
+  // ) : (
+  //   <Slot />
+  // );
+
+  return <Slot />;
 };
 
 const styles = StyleSheet.create({

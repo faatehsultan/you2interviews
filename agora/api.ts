@@ -6,6 +6,7 @@ import {
   ENDPOINT_FILE_MP3_RECORDED_CHANNEL,
   ENDPOINT_NEW_TOKEN,
   ENDPOINT_STOP_RECORD,
+  ENDPOINT_USER_UPDATE,
   ENDPOINT_USERS_LIST,
 } from "@/constants/api";
 
@@ -95,6 +96,34 @@ export const getMp3RecordedFile = async (channel: string) => {
       `${BACKEND_URL}${ENDPOINT_FILE_MP3_RECORDED_CHANNEL}?channel=${channel}`
     );
 
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const updateUserProfile = async (
+  uid: string,
+  newEmail?: string,
+  newName?: string,
+  newPassword?: string
+) => {
+  try {
+    const response = await fetch(
+      `${BACKEND_URL}${ENDPOINT_USER_UPDATE}${uid}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: newEmail,
+          name: newName,
+          password: newPassword,
+        }),
+      }
+    );
     const data = await response.json();
     return data;
   } catch (error) {
